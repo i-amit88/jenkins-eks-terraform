@@ -1,23 +1,10 @@
-# terraform {
-#   required_providers {
-#     aws = {
-#       source = "hashicorp/aws"
-#       version = "5.43.0"
-#     }
-#   }
-# }
-
-# provider "aws" {
-#   region = "us-west-1"
-# }
-
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.7.0"
 
   name = "jenkins-vpc"
   cidr = var.vpc_cidr
-
+                             
   azs            = data.aws_availability_zones.azs.names
   public_subnets = var.vpc_public_subnet
 
@@ -37,4 +24,65 @@ module "vpc" {
     Name = "jenkins igw"
   }
 
+}
+
+#SG
+module "jenkins_security_group" {
+  source = "terraform-aws-modules/security-group/aws"
+
+  name        = "jenkins-sg"
+  description = "jenkins-server"
+  vpc_id      = module.vpc.vpc_id
+
+
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 8080
+      to_port     = 8080
+      protocol    = "tcp"
+      description = "Jenkins-server"
+      cidr_blocks = "0.0.0.0/0"
+    },
+    {
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      description = "SSH"
+      cidr_blocks = "0.0.0.0/0"
+    },
+  ]
+
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = "0.0.0.0/0"
+    }
+  ]
+  tags = {
+    Name = "jenkins-sg" 
+  }
+}
+
+
+#EC2
+module "ec2_instance" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+
+  name = "jenkins-instance"
+
+  instance_type          = var.instance_type
+  key_name               = "amit-login"
+  monitoring             = true
+  vpc_security_group_ids = [module.jenkins_security_group.this_security_group_id]
+  subnet_id              = module.vpc.public_subnets[0]
+  associate_public_ip_address = true
+  user_data = file("jenkins-install.sh")
+  availability_zone = data.aws_availability_zones.azs.names[0]
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
 }
