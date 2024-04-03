@@ -3,9 +3,10 @@ data "aws_ami" "example" {
   most_recent = true
   owners      = ["amazon"]
 
+ 
   filter {
     name   = "name"
-    values = ["amzn2-ami-kernel-*-hvm-*-*-x86_64-gp2"]
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
   }
 
   filter {
