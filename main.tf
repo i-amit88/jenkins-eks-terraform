@@ -73,9 +73,9 @@ module "ec2_instance" {
   name = "jenkins-instance"
 
   instance_type          = var.instance_type
-  key_name               = "amit-login"
+  key_name               = "mumbai-login"
   monitoring             = true
-  vpc_security_group_ids = [module.jenkins_security_group.this_security_group_id]
+  vpc_security_group_ids = [module.jenkins_security_group.security_group_id]
   subnet_id              = module.vpc.public_subnets[0]
   associate_public_ip_address = true
   user_data = file("jenkins-install.sh")
