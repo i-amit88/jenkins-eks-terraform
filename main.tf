@@ -73,7 +73,7 @@ module "ec2_instance" {
   name = "jenkins-instance"
 
   instance_type          = var.instance_type
-  key_name               = "mumbai-login"
+  key_name               = "amit-aws-login"
   monitoring             = true
   vpc_security_group_ids = [module.jenkins_security_group.security_group_id]
   subnet_id              = module.vpc.public_subnets[0]
