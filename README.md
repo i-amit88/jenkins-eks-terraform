@@ -1,1 +1,0 @@
-# Creating eks cluster using terraform with jenkins ci/cd tool 
